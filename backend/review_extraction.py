@@ -11,7 +11,7 @@ import json
 
 # Configure Selenium WebDriver
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
+chrome_options.add_argument("--headless")  
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -25,15 +25,13 @@ def extract_reviews(url):
     # Open the URL
     driver.get(url)
 
-    # Wait for the page to load (adjust timeout as needed)
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "styles_reviewCardInner__UZk1x"))
     )
 
     reviews = []
     while True:
-        # Scroll to load more reviews if necessary (simulate infinite scroll)
-        for _ in range(5):  # Adjust the range based on the number of reviews to load
+        for _ in range(5):
             driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
             time.sleep(2)  # Wait for content to load
 
@@ -46,26 +44,25 @@ def extract_reviews(url):
                 try:
                     reviewer = card.find_element(By.CSS_SELECTOR, "[data-consumer-name-typography='true']").text.strip()
                 except Exception:
-                    reviewer = ""  # Default to empty string if not found
+                    reviewer = "" 
 
         # Extract review title (default to empty string if not found)
                 try:
                     title = card.find_element(By.CSS_SELECTOR, "[data-service-review-title-typography='true']").text.strip()
                 except Exception:
-                    title = ""  # Default to empty string if not found
+                    title = ""  
 
-        # Extract review body (default to empty string if not found)
                 try:
                     body = card.find_element(By.CSS_SELECTOR, "[data-service-review-text-typography='true']").text.strip()
                 except Exception:
-                    body = ""  # Default to empty string if not found
+                    body = ""  
 
         # Extract rating (default to 0 if not found)
                 try:
                     rating_alt = card.find_element(By.CSS_SELECTOR, "div.star-rating_starRating__sdbkn img").get_attribute("alt")
                     rating = int(rating_alt.split()[1])  # Extract rating number
                 except Exception:
-                    rating = 0  # Default rating if not found
+                    rating = 0  
 
         # Append to the reviews list
                 reviews.append({

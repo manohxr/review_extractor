@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from review_extraction import extract_reviews
 from flask_cors import CORS
 import json
 app = Flask(__name__)
 CORS(app)
-
+@app.route('/')
+def index():
+    return render_template('index.html')
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
     url = request.args.get('page')

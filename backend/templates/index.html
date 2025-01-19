@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2e2e2e;
+            color: #f1f1f1;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow-x: hidden; /* Remove horizontal scrollbar */
+        }
+        .container {
+            background-color: #333;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 90vh;
+            overflow-x: hidden; /* Remove horizontal scrollbar */
+        }
+        h2 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: #f1f1f1;
+            font-size: 16px;  /* Adjust font size */
+            box-sizing: border-box; /* Ensures padding does not overflow the width */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .reviews {
+            margin-top: 20px;
+        }
+        .review {
+            background-color: #444;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .review h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #ffcc00;
+        }
+        .review p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .review .rating {
+            font-weight: bold;
+            color: #ff9800;
+        }
+        .error {
+            color: #f44336;
+            font-size: 18px;
+        }
+        .success {
+            color: #4CAF50;
+            font-size: 18px;
+        }
+        .loading {
+            color: #f1f1f1;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Review Extractor</h2>
+    <form id="urlForm">
+        <input type="url" id="url" placeholder="Enter Product URL" required>
+        <button type="submit">Get Reviews</button>
+    </form>
+
+    <!-- Loading message container -->
+    <div id="loadingMessage" class="loading" style="display: none;">Loading...</div>
+
+    <div class="reviews" id="reviewsContainer"></div>
+</div>
+
+<script>
+    document.getElementById('urlForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Show loading message
+        document.getElementById('loadingMessage').style.display = 'block';
+        const url = document.getElementById('url').value;
+
+        // Clear previous reviews
+        const reviewsContainer = document.getElementById('reviewsContainer');
+        reviewsContainer.innerHTML = '';
+
+        fetch(`/api/reviews?page=${encodeURIComponent(url)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading message
+                document.getElementById('loadingMessage').style.display = 'none';
+
+                if (data.error) {
+                    reviewsContainer.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    reviewsContainer.innerHTML = `<p class="success">Total Reviews: ${data.review_count}</p>`;
+                    data.reviews.forEach(review => {
+                        const reviewDiv = document.createElement('div');
+                        reviewDiv.classList.add('review');
+                        reviewDiv.innerHTML = `
+                            <h4>${review.reviewer || 'Anonymous'}</h4>
+                            <p class="rating">Rating: ${review.rating}/5</p>
+                            <p><strong>Title:</strong> ${review.title}</p>
+                            <p><strong>Review:</strong> ${review.body}</p>
+                        `;
+                        reviewsContainer.appendChild(reviewDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                reviewsContainer.innerHTML = '<p class="error">An error occurred while fetching reviews.</p>';
+            });
+    });
+</script>
+
+</body>
+</html>
